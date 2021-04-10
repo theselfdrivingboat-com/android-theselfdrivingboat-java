@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -262,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         mBTSocket = createBluetoothSocket(device);
-                    } catch (IOException e) {
+                    } catch (IOException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                         fail = true;
                         Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                     }
@@ -292,9 +293,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
-        //creates secure outgoing connection with BT device using UUID
+    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return (BluetoothSocket) device.getClass().getMethod("createRfcommSocketToServiceRecord", UUID.class).invoke(device,1);
     }
 
     private class ConnectedThread extends Thread {
